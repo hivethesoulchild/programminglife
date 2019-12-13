@@ -1,0 +1,62 @@
+package jframe;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+
+public class GUI2 extends JFrame implements ActionListener {
+
+    JLabel label = new JLabel("Enter your name: ");
+    JButton button1 = new JButton("Login");
+    JButton button2 = new JButton("Exit");
+    JTextField textEmail = new JTextField(10);
+    JLabel greeting = new JLabel("");
+    JLabel confirm = new JLabel("");
+
+    GUI2() {
+        super("Welcome to Philadelphia, Pennsylvania! ");
+        button1.setToolTipText("Click to display your name");
+        button2.setToolTipText("Exit?");
+        label.setFont(new java.awt.Font("Arial", Font.ITALIC, 12));
+        label.setForeground(Color.black);
+        setSize(275, 225);
+        setDefaultCloseOperation(3);
+        setLocationRelativeTo(null);
+        setLayout(new FlowLayout(FlowLayout.CENTER));
+        add(label);
+        add(textEmail);
+        add(button1);
+        add(button2);
+        add(greeting);
+        button1.addActionListener(this);
+        button2.addActionListener(this);
+        setVisible(true);
+    }
+
+    public void actionPerformed(ActionEvent e) {
+        Object source = e.getSource();
+        JFrame yesoryes = new JFrame("Are you sure about that?");
+        if (source == button1) {
+            String name = textEmail.getText();
+            String bati = "I love you, " + name + "!";
+            greeting.setText(bati);
+            JOptionPane.showMessageDialog(null, "Sana all may jowa!", "VI VON ZULUL", JOptionPane.ERROR_MESSAGE);
+        } else if (source == button2) {
+            int answer = JOptionPane.showConfirmDialog(yesoryes,
+                    "Sure? You want to exit?", "Are you sure about that?",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE);
+            if (answer == JOptionPane.YES_OPTION) {
+                confirm.setText("Yes");
+                System.exit(0);
+            } else if (answer == JOptionPane.NO_OPTION) {
+                confirm.setText("No");
+            }
+
+        }
+    }
+
+    public static void main(String[] args) {
+        GUI2 gui2 = new GUI2();
+    }
+}
