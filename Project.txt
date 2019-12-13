@@ -1,0 +1,763 @@
+package Project;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Scanner;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.sql.Timestamp;
+
+public class Project {
+
+    public static Scanner sc = new Scanner(System.in);
+    public static String filePath = "C:\\Users\\LENOVO\\Desktop\\Accounts.txt";
+    public static ArrayList<String> prod = new ArrayList<String>();
+    public static ArrayList<String> history = new ArrayList<String>();
+ 
+    public static void main(String[] args) { // test for codes before the actual
+        FileChecker();
+    }
+
+    public static void FileChecker() { // check if the file exist or not
+        boolean fileExist = false;
+        try { // read the file if exist
+            FileReader fReader = new FileReader(filePath);
+            BufferedReader bReader = new BufferedReader(fReader);
+
+            bReader.close();
+            fReader.close();
+
+            fileExist = true;
+        } catch (Exception e) { // if file does not exist this program will create a file
+            try {
+                FileWriter fWriter = new FileWriter(filePath, true);
+                BufferedWriter bWriter = new BufferedWriter(fWriter);
+
+                bWriter.write(""); // in order to create the file you must write something in it
+
+                bWriter.close();
+                fWriter.close();
+
+                System.out.println("Start The System Again!"); // ask the user to start the system again
+                System.exit(0);
+            } catch (Exception again) {
+
+            }
+        }
+        if (fileExist) {
+            Start();// calling the method if file existed
+        }
+    }
+
+    public static void Start() { // the start of the program
+        System.out.println("************Hello!*************");
+        System.out.println("Welcome to the Shopping Console");
+        Choices(); // calling a method again
+    }
+
+    public static void Choices() { // give the user a options
+        System.out.println("\nHow may I help you?\n");
+        System.out.println("[1] Login");
+        System.out.println("[2] Create an Account");
+        System.out.println("[3] Exit\n");
+        ChoicesChecker(); //check if the option is valid or invalid
+    }
+
+    public static void ChoicesChecker() {
+        System.out.print("Enter Your Options: "); // where the user will input his/her options
+        String option = sc.nextLine();
+
+        // this is where the option are being checked before proceeding in the next method
+        switch (option) {
+            case "1":
+                Login();
+                break;
+            case "2":
+                CreateAccountUsername();
+                break;
+            case "3":
+                System.out.println("\nThank you for shopping with us :)");
+                System.exit(0);
+                break;
+            default: // display this if the user input something that is not valid
+                System.out.println("\nWrong Input! Try Again\n");
+                ChoicesChecker();
+                break;
+        }
+    }
+
+    public static void Login() { // where the login of user starts
+        System.out.println("\n***Login System***\n");
+        System.out.print("Enter your Username: ");
+        String user = sc.nextLine();
+        System.out.print("Enter your Password: ");
+        String pass = sc.nextLine();
+
+        if (user.equalsIgnoreCase("Admin") && pass.equalsIgnoreCase("admin")) { // check if the user is an admin
+            System.out.println("\nWelcome Admin!\n");
+            AdminOrGuest(user);
+        } else { // if the user is a guest and not admin
+            boolean userAccount = false;
+            boolean passIsIncorrect = false;
+            try { //this will check the username and password being inputted by the user
+                FileReader fReader = new FileReader(filePath);
+                BufferedReader bReader = new BufferedReader(fReader);
+
+                String line = "";
+                while ((line = bReader.readLine()) != null) {
+                    String[] perWord = line.split(",");
+
+                    if (user.equals(perWord[0]) && pass.equals((perWord[1]))) {
+                        userAccount = true;
+                    } else if (user.equals(perWord[0])) {
+                        passIsIncorrect = true;
+                    }
+                }
+                bReader.close();
+                fReader.close();
+            } catch (Exception e) {
+
+            }
+            if (userAccount) { // if the user input the correct username and password
+                System.out.println("\nWelcome " + user + "\n");
+                AdminOrGuest(user);
+            } else if (passIsIncorrect) { // if the user input a incorrect password
+                System.out.println("\nPassword is Incorrect Please Try again!");
+                Login();
+            } else { // if the account is not existed
+                System.out.println("\nNo account existed!");
+                System.out.println("\nChoose from the following options");
+                System.out.println("\n[1] Already Have an Account");
+                System.out.println("[2] Create an Account first");
+                System.out.println("[3] Go back to Choices\n");
+                NoAccountExisted();
+            }
+        }
+    }
+
+    public static void CreateAccountUsername() { // where the user create his/her account
+        System.out.println("\nThe Username should have atleast three (3) Characters"); // conditions of a username
+        System.out.print("Enter your desired Username: ");
+        String user = sc.nextLine();
+        boolean accept = UsernameChecker(user);
+        if (accept) { // if the user inputted a valid username or meet the conditions of a username
+            CreateAccountPassword(user);
+        } else { // if the user inputted a invalid username
+            CreateAccountUsername();
+        }
+    }
+
+    public static boolean UsernameChecker(String user) {
+        boolean userError = false;
+        boolean userExist = false;
+        boolean userAdmin = false;
+        if (user.equalsIgnoreCase("admin")) {
+            System.out.println("\nUsername is Invalid, Try a new One");
+            userAdmin = true;
+        } else if (user.length() < 3) {
+            userError = true;
+        } else {
+            try {
+                FileReader fReader = new FileReader(filePath);
+                BufferedReader bReader = new BufferedReader(fReader);
+
+                String line = "";
+                while ((line = bReader.readLine()) != null) {
+                    String[] perWord = line.split(",");
+
+                    if (user.equals(perWord[0])) {
+                        userExist = true;
+                    }
+                }
+                bReader.close();
+                fReader.close();
+            } catch (Exception e) {
+
+            }
+        }
+        if (userAdmin) {
+            return false;
+        } else if (userError) {
+            System.out.println("\nThe desired username does not meet the require input, Try Again!");
+            return false;
+        } else if (userExist) {
+            System.out.println("\nUsername already exist, Try Again!");
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    public static void CreateAccountPassword(String user) {
+        System.out.println("\nThe Password should have length of eight (8) Characters with atleast one (1) UpperCase, LowerCase and Number");
+        System.out.print("Enter your desired password: ");
+        String pass = sc.nextLine();
+        boolean accept = PasswordChecker(user, pass);
+
+        if (accept) {
+            CreateAccount(user, pass);
+        } else {
+            System.out.println("\nPassword is too weak! or Password does not meet the required input, Try again!");
+            CreateAccountPassword(user);
+        }
+    }
+
+    public static boolean PasswordChecker(String user, String pass) {
+        boolean condition = false;
+        boolean smallC = false;
+        boolean largeC = false;
+        boolean numb = false;
+        boolean passToWeak = false;
+
+        if (pass.length() >= 8) { //if the password length is valid or greater than or equals to 8
+            for (int count = 0; count < pass.length(); count++) {
+                char ch = pass.charAt(count);
+                if (Character.isLowerCase(ch)) {
+                    smallC = true;
+                } else if (Character.isUpperCase(ch)) {
+                    largeC = true;
+                } else if (Character.isDigit(ch)) {
+                    numb = true;
+                }
+            }
+        } else { //if the password length is not valid or less than 8
+            passToWeak = true;
+        }
+
+        if (smallC && largeC && numb) {
+            return true;
+        } else if (passToWeak) {
+            return condition;
+        } else {
+            return condition;
+        }
+    }
+
+    public static void CreateAccount(String user, String pass) {
+        try {
+            FileWriter fWriter = new FileWriter(filePath, true);
+            BufferedWriter bWriter = new BufferedWriter(fWriter);
+
+            bWriter.write(user + ",");
+            bWriter.write(pass);
+            bWriter.newLine();
+
+            bWriter.close();
+            fWriter.close();
+
+        } catch (Exception e) {
+
+        }
+        System.out.println("\nAccount Created Sucessfully");
+        Choices();
+    }
+
+    public static void NoAccountExisted() {
+        System.out.print("Enter your Options: ");
+        String choice = sc.nextLine();
+        if (choice.equals("1")) {
+            Login();
+        } else if (choice.equals("2")) {
+            CreateAccountUsername();
+        } else if (choice.equals("3")) {
+            Choices();
+        } else {
+            System.out.println("\nWrong Input Try Again!");
+            NoAccountExisted();
+        }
+    }
+
+    public static void AdminOrGuest(String user) {
+        if (user.equalsIgnoreCase("admin")) {
+            Inventory(user);
+            System.out.println("\nWhat do you want to do?");
+            System.out.println("[1] Add a Product");
+            System.out.println("[2] Modify a product");
+            System.out.println("[3] Delete a product");
+            System.out.println("[4] Transaction History");
+            System.out.println("[5] Logout\n");
+            InventoryOptions(user);
+        } else {
+            System.out.println("\nWhat do you want to do?");
+            System.out.println("[1] Purchase a Product");
+            System.out.println("[2] Logout\n");
+            InventoryOptions(user);
+        }
+    }
+
+    public static void InventoryOptions(String user) {
+        if (user.equalsIgnoreCase("admin")) {
+            System.out.print("Enter your Options: ");//input of the choices of an admin
+            String input = sc.nextLine();
+            
+            switch (input) { //determining the input of an admin
+                case "1":
+                    AddProduct(user);
+                    break;
+                case "2":
+                    ModifyProduct(user);
+                    break;
+                case "3":
+                    DeleteProduct(user);
+                    break;
+                case "4":
+                    History(user);
+                    break;
+                case "5":
+                    Choices();
+                    break;
+                default: //if the input is not valid
+                    System.out.println("\nInvalid input, Try Again!\n");
+                    InventoryOptions(user);
+                    break;
+            }
+        } else {
+            System.out.print("Enter your Options: ");
+            String input = sc.nextLine();
+
+            switch (input) {
+                case "1":
+                    Inventory(user);
+                    break;
+                case "2":
+                    Choices();
+                    break;
+                default: //if the input is not valid
+                    System.out.println("\nInvalid input, Try Again!");
+                    InventoryOptions(user);
+                    break;
+            }
+        }
+    }
+
+    public static void Inventory(String user) {
+        AutoDelete();
+        if (user.equalsIgnoreCase("admin")) { 
+            if (prod.size() == 0) { //if the input is not valid, it will come back to the inventory options
+                System.out.println("No Product to Display, Add a product first!");
+            } else { //if the input is valid, it will display a product
+                System.out.println("Qty     Product     Price");
+                for (int count = 0; count < prod.size(); count++) {
+                    String line = prod.get(count);
+                    String[] perWord = line.split(",");
+                    for (int counter = 0; counter < perWord.length; counter++) {
+                        System.out.print(perWord[counter] + "       ");
+                    }
+                    System.out.println();
+                }
+            }
+        } else {
+            //if the input is not valid, it will come back to the user options
+            if (prod.size() == 0) {
+                System.out.println("\nNo Product available yet, Come Back Again!");
+                AdminOrGuest(user);
+            } else { //if the product exist, it will display the product 
+                System.out.println("\n      Qty     Product     Price");
+                for (int count = 0; count < prod.size(); count++) {
+                    String line = prod.get(count);
+                    System.out.print("[" + (count + 1) + "]   ");
+                    String[] perWord = line.split(",");
+                    for (int counter = 0; counter < perWord.length; counter++) {
+                        System.out.print(perWord[counter] + "      ");
+
+                    }
+                    System.out.println();
+                }
+                GuestOptions(user);
+            }
+        }
+    }
+
+    public static void AddProduct(String user) {
+        System.out.println("\nAdding Product\n");
+        String prodName = ProductName();
+        String qty = QuantityChecker();
+        String price = PriceChecker();
+
+        //it will add a product
+        prod.add(qty + "," + prodName + "," + price);
+        System.out.println("\nProduct Created Successfully\n");
+        AdminOrGuest(user);
+    }
+
+    public static String ProductName() {
+        Scanner temp = new Scanner(System.in);
+        System.out.print("Enter Product Name: ");
+        String prodName = temp.nextLine();
+        
+        //it will return the String
+        return prodName;
+    }
+
+    public static String QuantityChecker() {
+        Scanner temp = new Scanner(System.in);
+        System.out.print("Quantity: ");
+
+        while (!temp.hasNextInt()) {
+            temp.next();
+            System.out.print("Invalid input enter a number: ");
+        }
+        int x = temp.nextInt();
+
+        String qty = Integer.toString(x);
+        return qty;
+    }
+
+    public static String PriceChecker() {
+        Scanner temp = new Scanner(System.in);
+        System.out.print("Price: ");
+
+        while (!temp.hasNextFloat()) {
+            temp.next();
+            System.out.print("Invalid input enter a number: ");
+        }
+        float x = temp.nextFloat();
+
+        String price = Float.toString(x);
+        return price;
+    }
+
+    public static void ModifyProduct(String user) {
+        if (prod.size() == 0) {
+            System.out.println("\nNo product to Modify add a Product first!\n");
+            AdminOrGuest(user);
+        } else {
+            System.out.println("\nModifying Product\n");
+            System.out.println("      Qty     Product     Price");
+            for (int count = 0; count < prod.size(); count++) {
+                System.out.print("[" + (count + 1) + "]     ");
+                String line = prod.get(count);
+                String[] perWord = line.split(",");
+                for (int counter = 0; counter < perWord.length; counter++) {
+                    System.out.print(perWord[counter] + "       ");
+                }
+                System.out.println();
+            }
+            SelectToModify(user);
+        }
+    }
+
+    public static void SelectToModify(String user) {
+        Scanner temp = new Scanner(System.in);
+
+        System.out.print("\nWhat product do you want to Modify? ");
+
+        while (!temp.hasNextInt()) {
+            temp.next();
+            System.out.println("\nInvalid input! Try again");
+            System.out.print("\nWhat product do you want to Modify? ");
+        }
+        int input = temp.nextInt();
+
+        if (input >= prod.size() + 1) {
+            System.out.println("\nInvalid input! Try again\n");
+            SelectToModify(user);
+
+        } else {
+            Modify(user, input);
+        }
+    }
+
+    public static void Modify(String user, int input) {
+        System.out.println("\nWhat do you want to modify? ");
+        System.out.println("[1] Quantity");
+        System.out.println("[2] Product Name");
+        System.out.println("[3] Price");
+        System.out.println("[4] Back\n");
+
+        OptionToModify(user, input);
+    }
+
+    public static void OptionToModify(String user, int input) {
+
+        System.out.print("Enter Your Options: ");
+        String choice = sc.nextLine();
+
+        switch (choice) {
+            case "1":
+                ModifyQuantity(user, input);
+                break;
+            case "2":
+                ModifyProductName(user, input);
+            case "3":
+                ModifyPrice(user, input);
+            case "4":
+                AdminOrGuest(user);
+                break;
+            default:
+                OptionToModify(user, input);
+                break;
+        }
+    }
+
+    public static void ModifyQuantity(String user, int input) {
+        Scanner temp = new Scanner(System.in);
+        String line = prod.get(input - 1);
+        String[] perWord = line.split(",");
+
+        System.out.print("\nEnter Quantity: ");
+
+        while (!temp.hasNextInt()) {
+            temp.next();
+            System.out.print("\nInvalid input enter a number: ");
+        }
+        int x = temp.nextInt();
+
+        String qty = Integer.toString(x);
+
+        prod.set(input - 1, qty + "," + perWord[1] + "," + perWord[2]);
+        System.out.println("\nThe Product has been updated");
+        Modify(user, input);
+    }
+
+    public static void ModifyProductName(String user, int input) {
+        Scanner temp = new Scanner(System.in);
+        String line = prod.get(input - 1);
+        String[] perWord = line.split(",");
+
+        System.out.print("\nEnter a new Product Name: ");
+        String prodName = temp.nextLine();
+
+        prod.set(input - 1, perWord[0] + "," + prodName + "," + perWord[2]);
+        System.out.println("\nThe Product has been updated");
+        Modify(user, input);
+    }
+
+    public static void ModifyPrice(String user, int input) {
+        Scanner temp = new Scanner(System.in);
+        String line = prod.get(input - 1);
+        String[] perWord = line.split(",");
+
+        System.out.print("\nEnter a new Price: ");
+
+        while (!temp.hasNextFloat()) {
+            temp.next();
+            System.out.print("\nInvalid input enter a number: ");
+        }
+        float x = temp.nextFloat();
+
+        String price = Float.toString(x);
+
+        prod.set(input - 1, perWord[0] + "," + perWord[1] + "," + price);
+        System.out.println("\nThe Product has been updated");
+        Modify(user, input);
+    }
+
+    public static void DeleteProduct(String user) {
+        if (prod.size() == 0) {
+            System.out.println("\nNo product to Delete, Add a Product first!\n");
+            AdminOrGuest(user);
+        } else {
+            System.out.println("     Qty     Product     Price");
+            for (int count = 0; count < prod.size(); count++) {
+                System.out.print("[" + (count + 1) + "]");
+                String line = prod.get(count);
+                String[] perWord = line.split(",");
+                for (int counter = 0; counter < perWord.length; counter++) {
+                    System.out.print(perWord[counter] + "       ");
+                }
+                System.out.println();
+            }
+            SelectToDelete(user);
+        }
+    }
+
+    public static void SelectToDelete(String user) {
+        Scanner temp = new Scanner(System.in);
+
+        System.out.print("What do you want to Delete? ");
+
+        while (!temp.hasNextInt()) {
+            temp.next();
+            System.out.println("Invalid input! Try again");
+            System.out.print("What do you want to Delete? ");
+        }
+        int input = temp.nextInt();
+
+        if (input >= prod.size() + 1) {
+            System.out.println("Invalid input! Try again");
+            SelectToDelete(user);
+
+        } else {
+            Verification(user, input);
+        }
+    }
+
+    public static void Verification(String user, int input) {
+        System.out.print("Are you sure you want to delete that product? (Y/N) ");
+        String x = sc.nextLine();
+
+        if (x.equalsIgnoreCase("Y")) {
+            prod.remove(input-1);
+            AdminOrGuest(user);
+        } else if (x.equalsIgnoreCase("N")) {
+            System.out.println("Product Retained");
+            AdminOrGuest(user);
+        } else {
+            System.out.println("Wrong Input Try Again");
+            Verification(user, input);
+        }
+    }
+
+    public static void History(String user) {
+        if (history.size() == 0) {
+            System.out.println("No Transactions yet");
+        } else {
+            System.out.println("Time of Purchase             Qty     Product     Price    Total Amount Purchased");
+            for (int count = 0; count < history.size(); count++) {
+                String line = history.get(count);
+                String[] perWord = line.split(",");
+                for (int counter = 0; counter < perWord.length; counter++) {
+                    System.out.print(perWord[counter] + "       ");
+                }
+                System.out.println();
+            }
+        }
+        BackOptions(user);
+    }
+
+    public static void BackOptions(String user) {
+        System.out.print("Go back? (Y/N) ");
+        String back = sc.nextLine();
+        if (back.equalsIgnoreCase("Y")) {
+            AdminOrGuest(user);
+        } else if (back.equalsIgnoreCase("N")) {
+            System.out.println("Wanna Go back now? ");
+            BackOptions(user);
+        } else {
+            System.out.println("Wrong Input Try Again");
+            BackOptions(user);
+        }
+    }
+
+    public static void GuestOptions(String user) {
+        Scanner temp = new Scanner(System.in);
+
+        System.out.print("\nWhat do you want to buy? ");
+
+        while (!temp.hasNextInt()) {
+            temp.next();
+            System.out.println("\nInvalid input! Try again");
+            System.out.print("\nWhat do you want to buy? ");
+        }
+        int input = temp.nextInt();
+
+        if (input >= prod.size() + 1) {
+            System.out.println("\nInvalid input! Try again");
+            GuestOptions(user);
+
+        } else {
+
+            String line = prod.get(input - 1);
+            String[] perWord = line.split(",");
+
+            int qty = Integer.parseInt(perWord[0]);
+            int buying = HowMany(qty);
+            int minus = (qty - buying);
+
+            double price = Double.parseDouble(perWord[2]);
+            double multi = price * buying;
+
+            System.out.println("That would be " + multi + " pesos");
+            PayingTheProduct(user, input, buying, minus, multi, price);
+        }
+    }
+
+    public static int ProductChoices() {
+        Scanner temp = new Scanner(System.in);
+
+        System.out.print("What do you want to buy? ");
+
+        while (!temp.hasNextInt()) {
+            temp.next();
+            System.out.println("\nInvalid input! Try again");
+            System.out.print("\nWhat do you want to buy? ");
+        }
+        int input = temp.nextInt();
+
+        return input;
+    }
+
+    public static int HowMany(int qty) {
+        Scanner temp = new Scanner(System.in);
+
+        System.out.print("\nHow many do you want to buy? ");
+        while (!temp.hasNextInt()) {
+            sc.next();
+            System.out.println("\nInvalid input! Try Again!");
+            System.out.print("\nHow many do you want to buy? ");
+        }
+        int buy = temp.nextInt();
+
+        if (buy > qty) {
+            System.out.println("\nThe Desired number of product is highest than the available product");
+            System.out.println("\nEnter again!");
+            HowMany(qty);
+        }
+        return buy;
+    }
+
+    public static void PayingTheProduct(String user, int input, int buying, int minus, double multi, double price) {
+        Scanner temp = new Scanner(System.in);
+
+        System.out.print("Enter an amount of money: ");
+        while (!temp.hasNextDouble()) {
+            temp.next();
+            System.out.print("Enter an amount of money: ");
+        }
+        double x = temp.nextDouble();
+
+        if (x < multi) {
+            System.out.println("/nInvalid Amount of money\n");
+            PayingTheProduct(user, input, buying, minus, multi, price);
+        } else {
+
+            PurchasetheProducts(user, input, buying, minus, multi, price, x);
+
+        }
+    }
+
+    public static void PurchasetheProducts(String user, int input, int buying, int minus, double multi, double price, double x) {
+        Date date = new Date();
+        long time = date.getTime();
+        Timestamp ts = new Timestamp(time);
+        
+
+        System.out.print("\nAre you sure you want to purchase the Product? (Y/N)");
+        String opt = sc.nextLine();
+        if (opt.equalsIgnoreCase("y")) {
+            System.out.println("Your Change is "+(x-multi));
+            String line = prod.get(input - 1);
+            String[] perWord = line.split(",");
+
+            perWord[0] = Integer.toString(minus);
+            perWord[1] = perWord[1];
+            perWord[2] = Double.toString(price);
+            prod.set(input - 1, (perWord[0] + "," + perWord[1] + "," + perWord[2]));
+            history.add(ts + "," + (Integer.toString(buying)) + "," + perWord[1] + "," + (Double.toString(price)) + "," + (Double.toString(multi)));
+
+            System.out.println("\nProduct Successfully Purchased");
+            AdminOrGuest(user);
+        } else if (opt.equalsIgnoreCase("n")) {
+            AdminOrGuest(user);
+        } else {
+            System.out.println("\nWrong Input Try Again");
+            PurchasetheProducts(user, input, buying, minus, multi, price,x);
+        }
+    }
+
+    public static void AutoDelete() {
+
+        for (int count = 0; count < prod.size(); count++) {
+            String line = prod.get(count);
+            String[] perWord = line.split(",");
+            int temp = Integer.parseInt(perWord[0]);
+            if (temp == 0) {
+                prod.remove(count);
+            }
+        }
+    }
+}
